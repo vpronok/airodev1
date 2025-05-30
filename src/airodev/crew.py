@@ -1,64 +1,53 @@
-from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
-from crewai.agents.agent_builder.base_agent import BaseAgent
-from typing import List
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+# File: crew.py
+from crewai import Crew, Agent, Task
+from tools.web_search_tool import WebSearchTool
+from tools.wordpress_elementor_tool import WordPressElementorTool
+from memory.recall_tool import RecallTool
+from utils.page_suggester import suggest_pages_for_website_type
 
-@CrewBase
-class Airodev():
-    """Airodev crew"""
+# Tools
+web_search_tool = WebSearchTool()
+elementor_tool = WordPressElementorTool()
+recall_tool = RecallTool()
 
-    agents: List[BaseAgent]
-    tasks: List[Task]
+# Agents
+airodev_agent = Agent(
+    name="Airodev",
+    role="Autonomous WordPress Website Designer using Elementor",
+    goal=(
+        "Design high-quality, responsive WordPress websites using Elementor Pro,"
+        " based on client input, competitive research, and prior learning."
+    ),
+    tools=[web_search_tool, elementor_tool, recall_tool],
+    backstory=(
+        "Airodev is a cutting-edge AI web designer trained in modern UI/UX and Elementor development."
+        " It continually improves by analyzing its past projects and client feedback."
+    ),
+    allow_delegation=False
+)
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
-    
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
-    @agent
-    def researcher(self) -> Agent:
-        return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
-            verbose=True
+# Task (example task setup; dynamically created in real scenarios)
+def create_design_task(user_prompt):
+    website_type = suggest_pages_for_website_type(user_prompt)
+    return Task(
+        description=(
+            f"Analyze the user request: '{user_prompt}'\n"
+            f"Identify it as a '{website_type}' website, suggest pages, search examples,"
+            " and build each page using Elementor via API."
+        ),
+        agent=airodev_agent,
+        expected_output=(
+            "A completed set of designed pages with Elementor, based on client input,"
+            " competitive research, and learned design patterns."
         )
+    )
 
-    @agent
-    def reporting_analyst(self) -> Agent:
-        return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True
-        )
-
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
-    @task
-    def research_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
-        )
-
-    @task
-    def reporting_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
-        )
-
-    @crew
-    def crew(self) -> Crew:
-        """Creates the Airodev crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
-        return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
-            process=Process.sequential,
-            verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
-        )
+# Crew definition
+def create_crew(user_prompt):
+    task = create_design_task(user_prompt)
+    crew = Crew(
+        agents=[airodev_agent],
+        tasks=[task],
+        verbose=True
+    )
+    return crew.run()
