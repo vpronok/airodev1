@@ -1,23 +1,32 @@
 [project]
 name = "airodev"
 version = "0.1.0"
-description = "airodev using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
-requires-python = ">=3.10,<3.13"
-dependencies = [
-    "crewai[tools]>=0.120.1,<1.0.0"
+description = "Airodev: An autonomous web designer agent using CrewAI and Elementor integration."
+authors = [
+  { name = "Your Name", email = "your@email.com" }
 ]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
 
-[project.scripts]
-airodev = "airodev.main:run"
-run_crew = "airodev.main:run"
-train = "airodev.main:train"
-replay = "airodev.main:replay"
-test = "airodev.main:test"
+[project.urls]
+Homepage = "https://github.com/vpronok/airodev1"
+
+[tool.uv]
+# Optional: UV-specific configuration if needed in the future
+
+[tool.poetry.dependencies]
+python = "^3.9"
+crewai = "^0.30.6"
+crewai-tools = "^0.1.7"
+requests = "^2.31.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+mypy = "^1.10.0"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.crewai]
-type = "crew"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
