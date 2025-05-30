@@ -1,0 +1,9 @@
+crew:
+  name: AirodevCrew
+  description: >
+    A specialized CrewAI setup that designs WordPress websites using Elementor based on dynamic user input.
+  agents:
+    - airodev
+  tasks:
+    - design_task
+  verbose: true
